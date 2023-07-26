@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  chrome:
+    image: selenium/standalone-chrome:114.0
+    ports:
+      - 4444:4444
+      - 7900:7900
+    shm_size: 2gb
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:4444" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    restart: always
+    # These should allow for concurrent work, but...
+    # environment:
+      # SE_NODE_OVERRIDE_MAX_SESSIONS: true
+      # SE_NODE_MAX_SESSIONS: 4
+      # START_XVFB: false
+
+  glamlabs:
+    image: glamlabs:latest
+    ports:
+      - 8080:8080
+    restart: always
+    environment:
+      BROWSER_URL: http://chrome:4444
+      INSTAGRAM_USERNAME: ${INSTAGRAM_USERNAME}
+      INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
+    depends_on:
+      chrome:
+        condition: service_healthy
